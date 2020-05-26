@@ -1,0 +1,77 @@
+{  
+  "variables": {
+    "iso_file": "{{env `ISO_FILE`}}",
+    "iso_checksum": "{{env `ISO_SUM`}}",
+    "iso_checksum_type": "{{env `ISO_SUM_TYPE`}}",
+    "boxname": "{{env `BOX_NAME`}}"
+  },
+  "builders":
+  [
+    {
+      "name": "vyos-vagrant",
+      "type": "virtualbox-iso",
+      "iso_url": "{{user `iso_file`}}",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "shutdown_command": "sudo halt -p",
+      "disk_size": 8192,
+      "headless": false,
+      "ssh_username": "vyos",
+      "ssh_password": "vyos",
+      "ssh_port": 22,
+      "guest_os_type": "Debian_64",
+      "ssh_wait_timeout": "300s",
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "packer-vyos",
+      "boot_wait": "50s",
+      "vboxmanage": [
+        [
+            "modifyvm",
+            "{{.Name}}",
+            "--memory",
+            "1024"
+        ],
+        [
+            "modifyvm",
+            "{{.Name}}",
+            "--cpus",
+            "1"
+        ]
+      ],
+      "boot_command":
+      [
+        "vyos<enter><wait2>",
+        "vyos<wait><enter><wait2>",
+        "configure<enter><wait1>",
+        "set interface ethernet eth0 address dhcp<enter><wait1>",
+        "set service ssh<enter><wait1>",
+        "set system login user vagrant authentication plaintext-password vagrant<enter><wait1>",
+        "set system login user vagrant authentication public-keys vagrant key 'AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ=='<enter><wait1>",
+        "set system login user vagrant authentication public-keys vagrant type 'ssh-rsa'<enter><wait1>",
+        "commit<enter><wait5>",
+        "save<enter><wait5>",
+        "delete interface ethernet eth0 hw-id<enter><wait1>",
+        "commit<enter><wait5>",
+        "save<enter><wait5>",
+        "exit<enter><wait1>",
+        "install image<enter><wait2>",
+        "<enter><wait2>",
+        "<enter><wait2>",
+        "<enter><wait2>",
+        "Yes<enter><wait2>",
+        "<enter><wait10>",
+        "<enter><wait5>",
+        "/opt/vyatta/etc/config/config.boot<enter><wait5>",
+        "vyos<enter><wait1>",
+        "vyos<wait><enter><wait2>",
+        "<enter><wait5>"
+      ]
+    }
+  ],
+  "post-processors": [{
+    "type": "vagrant",
+    "compression_level": "8",
+    "output": "vyos-{{.Provider}}.box"
+  }]
+}
+  

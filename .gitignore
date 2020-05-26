@@ -1,0 +1,7 @@
+packer_cache
+iso.iso
+*_private*
+.vscode
+
+
+.DS_Store
